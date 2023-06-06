@@ -6,12 +6,13 @@ import Referee from '../../referee/Referee';
 const verticalAxis = ['1','2','3','4','5','6','7','8'];
 const horizontalAxis = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
-interface Piece {
+export interface Piece {
   image: string
   x: number
   y: number
   type: PieceType
   team: TeamType
+  enPassant?: boolean;
 }
 
 export enum TeamType {
@@ -178,28 +179,81 @@ export default function Chessboard() {
       const x = Math.floor((e.clientX - chessboard.offsetLeft) / 100);
       const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100)); //-800 because pointer starts 0,0 at top left of board whilst board 0,0 at bottom left of board... abs because of negative y value
 
-      
-      setPieces(value => {
-        const pieces = value.map(p => {
-          if (p.x === gridX && p.y === gridY) {
-            const validMove = referee.isValidMove(gridX, gridY, x, y, p.type, p.team);
+      const currentPiece = pieces.find(p => p.x === gridX && p.y === gridY);
+      // const attackedPiece = pieces.find(p => p.x === x && p.y === y);
 
-            if (validMove) {
-              p.x = x;
-              p.y = y;
-            } else {
-              activePiece.style.position = 'relative';
-              activePiece.style.removeProperty('top');
-              activePiece.style.removeProperty('left');
+      if (currentPiece) {
+        const validMove = referee.isValidMove(
+        gridX, 
+        gridY,
+        x,
+        y, 
+        currentPiece.type, 
+        currentPiece.team, 
+        pieces
+        );
+
+        const isEnPassantMove = referee.isEnPassantMove(
+          gridX, 
+          gridY, 
+          x, 
+          y, 
+          currentPiece.type, 
+          currentPiece.team, 
+          pieces
+        );
+        
+        const pawnDirection = (currentPiece.team === TeamType.OUR) ? 1 : -1;
+
+        if (isEnPassantMove) {
+          const updatedPieces = pieces.reduce((results, piece) => {
+            if (piece.x === gridX && piece.y === gridY) {
+              piece.enPassant = false;
+              piece.x = x;
+              piece.y = y;
+              results.push(piece);
+            } else if (!(piece.x === x && piece.y === y - pawnDirection)) {
+              if (piece.type === PieceType.PAWN) {
+                piece.enPassant = false;
+              }
+              results.push(piece);
             }
 
+            return results;
+          }, [] as Piece[]);
 
-          }
-          return p;
-        })
-        return pieces;
-      });
-      setActivePiece(null);
+          setPieces(updatedPieces);
+        } else if (validMove) {
+          //updates and remove piece
+          const updatedPieces = pieces.reduce((results, piece) => {
+            if (piece.x === gridX && piece.y === gridY) {
+              if (Math.abs(gridY - y) === 2 && piece.type === PieceType.PAWN) {
+                piece.enPassant = true;
+              } else {
+                piece.enPassant = false;
+              }
+              piece.x = x;
+              piece.y = y;
+              results.push(piece);
+            } else if (!(piece.x === x && piece.y === y)) { //pushes into array if piece is unaffected by moving piece
+              if (piece.type === PieceType.PAWN) {
+                piece.enPassant = false;
+              }
+              results.push(piece);
+            }
+            return results;
+          }, [] as Piece[]);
+
+          setPieces(updatedPieces);
+
+        } else {
+          //reset piece
+          activePiece.style.position = 'relative';
+          activePiece.style.removeProperty('top');
+          activePiece.style.removeProperty('left');
+        }
+        setActivePiece(null);
+      }
     }
   }
 
