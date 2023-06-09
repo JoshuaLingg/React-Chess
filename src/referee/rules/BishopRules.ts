@@ -30,3 +30,58 @@ export const bishopMove = (
   }
   return false;
 }  
+
+export const getPossibleBishopMoves = (bishop: Piece, boardState: Piece[]): Position[] => {
+  const possibleMoves: Position[] = [];
+
+  //upper right 
+  for (let i = 1; i < 8; i++) {
+    const destination: Position = {x: bishop.position.x + i, y: bishop.position.y + i};
+    if (!tileIsOccupied(destination, boardState)) {
+      possibleMoves.push(destination);
+    } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, bishop.team)) {
+      possibleMoves.push(destination);
+      break;
+    } else {
+      break; // stop loop if encounter same team piece
+    }
+  }
+  //upper left
+  for (let i = 1; i < 8; i++) {
+    const destination: Position = {x: bishop.position.x - i, y: bishop.position.y + i};
+    if (!tileIsOccupied(destination, boardState)) {
+      possibleMoves.push(destination);
+    } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, bishop.team)) {
+      possibleMoves.push(destination);
+      break;
+    } else {
+      break; // stop loop if encounter same team piece
+    }
+    }
+      //bottom left
+  for (let i = 1; i < 8; i++) {
+    const destination: Position = {x: bishop.position.x - i, y: bishop.position.y - i};
+    if (!tileIsOccupied(destination, boardState)) {
+      possibleMoves.push(destination);
+    } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, bishop.team)) {
+      possibleMoves.push(destination);
+      break;
+    } else {
+      break; // stop loop if encounter same team piece
+    }
+  }
+  //bottom right 
+  for (let i = 1; i < 8; i++) {
+    const destination: Position = {x: bishop.position.x + i, y: bishop.position.y - i};
+    if (!tileIsOccupied(destination, boardState)) {
+      possibleMoves.push(destination);
+    } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, bishop.team)) {
+      possibleMoves.push(destination);
+      break;
+    } else {
+      break; // stop loop if encounter same team piece
+    }
+  }
+  return possibleMoves;
+
+}

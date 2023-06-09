@@ -47,3 +47,59 @@ export const rookMove = (
   }
   return false;
 }
+
+export const getPossibleRookMoves = (rook: Piece, boardState: Piece[]): Position[] => {
+  const possibleMoves: Position[] = [];
+
+  // right
+  for (let i = 1; i < 8; i++) {
+    const destination: Position = {x: rook.position.x + i, y: rook.position.y};
+    if (!tileIsOccupied(destination, boardState)) {
+      possibleMoves.push(destination);
+    } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, rook.team)) {
+      possibleMoves.push(destination);
+      break;
+    } else {
+      break; // stop loop if encounter same team piece
+    }
+  }
+  // left
+  for (let i = 1; i < 8; i++) {
+    const destination: Position = {x: rook.position.x - i, y: rook.position.y};
+    if (!tileIsOccupied(destination, boardState)) {
+      possibleMoves.push(destination);
+    } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, rook.team)) {
+      possibleMoves.push(destination);
+      break;
+    } else {
+      break; // stop loop if encounter same team piece
+    }
+  }
+  // up
+  for (let i = 1; i < 8; i++) {
+    const destination: Position = {x: rook.position.x, y: rook.position.y + i};
+    if (!tileIsOccupied(destination, boardState)) {
+      possibleMoves.push(destination);
+    } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, rook.team)) {
+      possibleMoves.push(destination);
+      break;
+    } else {
+      break; // stop loop if encounter same team piece
+    }
+  }
+  // down
+  for (let i = 1; i < 8; i++) {
+    const destination: Position = {x: rook.position.x, y: rook.position.y - i};
+    if (!tileIsOccupied(destination, boardState)) {
+      possibleMoves.push(destination);
+    } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, rook.team)) {
+      possibleMoves.push(destination);
+      break;
+    } else {
+      break; // stop loop if encounter same team piece
+    }
+  }
+
+  return possibleMoves;
+
+}
