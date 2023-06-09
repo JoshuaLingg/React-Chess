@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import './App.css'
-import Chessboard from './components/Chessboard/Chessboard'
 import Referee from './components/Referee/Referee'
 
 function App() {
