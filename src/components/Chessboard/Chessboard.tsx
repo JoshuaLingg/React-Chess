@@ -5,10 +5,8 @@ import {
   VERTICAL_AXIS, 
   HORIZONTAL_AXIS, 
   GRID_SIZE,
-  Piece, 
-  Position,
-  samePosition, 
 } from '../../Constants';
+import { Piece, Position } from '../../models';
 
 interface Props {
   playMove: (piece: Piece, position: Position) => boolean;
@@ -17,7 +15,7 @@ interface Props {
 
 export default function Chessboard({playMove, pieces} : Props) {
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
-  const [grabPosition, setGrabPosition] = useState<Position>({x: -1, y: -1}); // -1 to pretend to be null
+  const [grabPosition, setGrabPosition] = useState<Position>(new Position(-1, -1)); // -1 to pretend to be null
   const chessboardRef = useRef<HTMLDivElement>(null);
 
   //GRABBING FUNCTIONS////////////////////
@@ -28,7 +26,7 @@ export default function Chessboard({playMove, pieces} : Props) {
     if (element.classList.contains('chess-piece') && chessboard) {
       const grabX = (Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE));
       const grabY = (Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)));//-800 because pointer starts 0,0 at top left of board whilst board 0,0 at bottom left of board... abs because of negative y value
-      setGrabPosition({x: grabX, y: grabY,}); 
+      setGrabPosition(new Position(grabX, grabY)); 
 
       //initial grab location to lock onto mouse
       const x = e.clientX - GRID_SIZE/2;
@@ -79,10 +77,10 @@ export default function Chessboard({playMove, pieces} : Props) {
       const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
       const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)); //-800 because pointer starts 0,0 at top left of board whilst board 0,0 at bottom left of board... abs because of negative y value
 
-      const currentPiece = pieces.find(p => samePosition(p.position, grabPosition));
+      const currentPiece = pieces.find(p => p.samePosition(grabPosition));
 
       if (currentPiece) {
-        let success = playMove(currentPiece, {x, y});
+        let success = playMove(currentPiece.clone(), new Position(x, y));
 
         if (!success) {
           //reset piece
@@ -101,14 +99,14 @@ export default function Chessboard({playMove, pieces} : Props) {
   for (let j = VERTICAL_AXIS.length - 1; j >= 0; j--) {
     for (let i = 0; i < HORIZONTAL_AXIS.length; i++) {
       const number = j + i + 2;
-      const piece = pieces.find(p => samePosition(p.position, { x: i, y: j}));
+      const piece = pieces.find(p => p.samePosition(new Position(i, j)));
       let image = piece ? piece.image : undefined;
 
       let currentPiece = activePiece !== null 
-      ? pieces.find(p => samePosition(p.position, grabPosition)) 
+      ? pieces.find(p => p.position.samePosition( grabPosition)) 
       : undefined;
       let highlight = currentPiece?.possibleMoves 
-      ? currentPiece.possibleMoves.some(p => samePosition(p, {x: i, y: j})) //check if current square is a possible move
+      ? currentPiece.possibleMoves.some(p => p.samePosition(new Position(i, j))) //check if current square is a possible move
       : false;
 
 
