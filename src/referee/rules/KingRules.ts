@@ -44,12 +44,20 @@ export const kingMove = (
   return false;
 }
 
+const outOfGrid = (destination: Position) => {
+  if (destination.x < 0 || destination.x > 7 || destination.y < 0 || destination.y > 7) {
+    return true;
+  }
+  return false;
+}
+
 export const getPossibleKingMoves = (king: Piece, boardState: Piece[]): Position[] => {
   const possibleMoves: Position[] = [];
 
   // right
   for (let i = 1; i < 2; i++) {
     const destination = new Position(king.position.x + i, king.position.y);
+    if (outOfGrid(destination)) break;
     if (!tileIsOccupied(destination, boardState)) {
       possibleMoves.push(destination);
     } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, king.team)) {
@@ -62,6 +70,7 @@ export const getPossibleKingMoves = (king: Piece, boardState: Piece[]): Position
   // left
   for (let i = 1; i < 2; i++) {
     const destination = new Position(king.position.x - i, king.position.y);
+    if (outOfGrid(destination)) break;
     if (!tileIsOccupied(destination, boardState)) {
       possibleMoves.push(destination);
     } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, king.team)) {
@@ -86,6 +95,7 @@ export const getPossibleKingMoves = (king: Piece, boardState: Piece[]): Position
   // down
   for (let i = 1; i < 2; i++) {
     const destination = new Position(king.position.x, king.position.y - i);
+    if (outOfGrid(destination)) break;
     if (!tileIsOccupied(destination, boardState)) {
       possibleMoves.push(destination);
     } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, king.team)) {
@@ -98,6 +108,7 @@ export const getPossibleKingMoves = (king: Piece, boardState: Piece[]): Position
     //upper right 
   for (let i = 1; i < 2; i++) {
     const destination = new Position(king.position.x + i, king.position.y + i);
+    if (outOfGrid(destination)) break;
     if (!tileIsOccupied(destination, boardState)) {
       possibleMoves.push(destination);
     } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, king.team)) {
@@ -110,6 +121,7 @@ export const getPossibleKingMoves = (king: Piece, boardState: Piece[]): Position
   //upper left
   for (let i = 1; i < 2; i++) {
     const destination = new Position(king.position.x - i, king.position.y + i);
+    if (outOfGrid(destination)) break;
     if (!tileIsOccupied(destination, boardState)) {
       possibleMoves.push(destination);
     } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, king.team)) {
@@ -122,6 +134,7 @@ export const getPossibleKingMoves = (king: Piece, boardState: Piece[]): Position
       //bottom left
   for (let i = 1; i < 2; i++) {
     const destination = new Position(king.position.x - i, king.position.y - i);
+    if (outOfGrid(destination)) break;
     if (!tileIsOccupied(destination, boardState)) {
       possibleMoves.push(destination);
     } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, king.team)) {
@@ -134,6 +147,7 @@ export const getPossibleKingMoves = (king: Piece, boardState: Piece[]): Position
   //bottom right 
   for (let i = 1; i < 2; i++) {
     const destination = new Position(king.position.x + i, king.position.y - i);
+    if (outOfGrid(destination)) break;
     if (!tileIsOccupied(destination, boardState)) {
       possibleMoves.push(destination);
     } else if (tileIsEmptyOrOccupiedByOpponent(destination, boardState, king.team)) {
@@ -146,4 +160,48 @@ export const getPossibleKingMoves = (king: Piece, boardState: Piece[]): Position
 
   return possibleMoves;
 
+}
+
+export const getCastlingMoves = (king: Piece, boardState: Piece[]): Position[] => {
+  const possibleMoves: Position[] = [];
+
+  if(king.hasMoved) return possibleMoves;
+
+  const rooks = boardState.filter(p => p.isRook 
+    && p.team === king.team 
+    && !p.hasMoved);
+
+  for(const rook of rooks) {
+    const direction = (rook.position.x - king.position.x > 0) ? 1 : -1;
+
+    const adjacentPosition = king.position.clone();
+    adjacentPosition.x += direction;
+
+    //check if rook can move to square adjacent of king
+    if (!rook.possibleMoves?.some(m => m.samePosition(adjacentPosition))) continue;
+
+    const concerningTiles = rook.possibleMoves.filter(m => m.y === king.position.y);
+
+    const enemyPieces = boardState.filter(p => p.team !== king.team);
+
+    // check if any enemy can attack the spaces between rook and king
+    let valid = true;
+    for(const enemy of enemyPieces) {
+      if (enemy.possibleMoves === undefined) continue;
+      for(const move of enemy.possibleMoves) {
+        if (concerningTiles.some(t => t.samePosition(move))) {
+          valid = false;
+        }
+
+        if (!valid) break;
+      }
+      if (!valid) break;
+    }
+
+    if (!valid) continue;
+
+    possibleMoves.push(rook.position.clone());
+  }
+
+  return possibleMoves;
 }

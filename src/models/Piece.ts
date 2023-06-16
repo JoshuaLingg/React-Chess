@@ -7,17 +7,20 @@ export class Piece {
   type: PieceType
   team: TeamType
   possibleMoves?: Position[];
+  hasMoved: boolean;
   constructor(
     position: Position, 
     type: PieceType, 
     team: TeamType, 
-    possibleMoves: Position[] = [] //set default value as empty array
+    hasMoved: boolean,
+    possibleMoves: Position[] = [], //set default value as empty array
     ) {
     this.image = `assets/images/${type}_${team}.png`;
     this.position = position;
     this.type = type;
     this.team = team;
     this.possibleMoves = possibleMoves;
+    this.hasMoved = hasMoved;
   }
 
   // get - getter
@@ -59,6 +62,7 @@ export class Piece {
       this.position.clone(), 
       this.type, 
       this.team, 
+      this.hasMoved,
       this.possibleMoves?.map(m => m.clone()));
   }
 

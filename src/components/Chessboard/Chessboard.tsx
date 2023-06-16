@@ -16,7 +16,7 @@ interface Props {
 export default function Chessboard({playMove, pieces} : Props) {
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
   const [grabPosition, setGrabPosition] = useState<Position>(new Position(-1, -1)); // -1 to pretend to be null
-  const chessboardRef = useRef<HTMLDivElement>(null);
+  const chessboardRef = useRef<HTMLDivElement>(null); //useref store values between renders
 
   //GRABBING FUNCTIONS////////////////////
 
