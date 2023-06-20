@@ -100,7 +100,7 @@ export default function Chessboard({playMove, pieces} : Props) {
     for (let i = 0; i < HORIZONTAL_AXIS.length; i++) {
       const number = j + i + 2;
       const piece = pieces.find(p => p.samePosition(new Position(i, j)));
-      let image = piece ? piece.image : undefined;
+      let image = piece ? piece.image : "";
 
       let currentPiece = activePiece !== null 
       ? pieces.find(p => p.position.samePosition( grabPosition)) 
